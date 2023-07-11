@@ -25,18 +25,26 @@
         }
 
         .cover {
-            width: 600px;
+            max-width: 600px;
             margin: 0 auto;
             box-shadow: 0 0 10px rgb(0 0 0 / 7%);
             border-radius: 10px;
             padding: 20px;
+            margin-top: 40px;
         }
 
 
-        h1 {
+        .h1 {
             text-align: center;
             color: #444;
             padding: 20px 0;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .h1 span {
+            font-size: 18px;
         }
 
         .link-github {
@@ -63,6 +71,8 @@
         .list-group {
             max-height: 400px;
             padding: 10px 20px 10px 10px;
+            border: 1px solid #eee;
+            margin: 10px;
         }
 
         .list-group-item {
@@ -128,13 +138,18 @@
         .el-popover {
             min-width: 128px;
         }
+        .el-scrollbar {
+            margin-bottom: -1px;
+            margin-right: -1px;
+        }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <h1>生成短链接</h1>
         <div class="cover">
+            <div class="h1"><span class="ci">🔗</span>生成短链接</div>
+
             <div class="card">
                 <el-row class="row">
                     <el-input placeholder="例如: https://example.com/?sign=2a7ec20f8cf8e" v-model="url">
@@ -199,6 +214,8 @@
                         </div>
                     </el-scrollbar>
                 </div>
+                <el-alert style="margin: 10px;" :closable="false" title="😉将长的链接转换成一个短小精悍的链接，方便分享和传播" type="success"></el-alert>
+
             </div>
             <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :close-on-click-modal="false">
                 <span>{{result}}</span>
@@ -282,10 +299,9 @@
                     } else {
                         this.result = res.error;
                     }
-                }).catch(function (err) {
-                    console.log(err);
+                }).catch((err) =>{
                     this.$message({
-                        type: 'success',
+                        type: 'error',
                         message: "Unknow error. Please retry!"
                     })
                     this.isGenerating = false
@@ -316,6 +332,7 @@
                         type: 'success',
                         message: '清空成功'
                     })
+                    this.initData()
                 }).catch(() => {
                     //         
                 })

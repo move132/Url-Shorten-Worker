@@ -33,7 +33,7 @@ Copy the `index.js` code from this project to Cloudflare Worker.
 Click Save and Deploy
 
 # Demo
-
+https://l.aiuse.xyz/l
 
 Note: Because someone abuse this demo website, all the generated link will automatically expired after 24 hours. For long-term use, please deploy your own.
 
