@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer" />
+    <title>短链接生成</title>
+    <meta name="description" content="简单免费搭建属于你自己的无服务器短链接平台">
+
+    <script src="https://unpkg.com/vue@2.6.11/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/@dense-labs/utils/dist/index.umd.js"></script>
+    <script src="./qrcode.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            cursor: default;
+        }
+
+        .cover {
+            width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgb(0 0 0 / 7%);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #444;
+            padding: 20px 0;
+        }
+
+        .link-github {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            fill: #ccc;
+        }
+
+        .link-github:hover svg {
+            fill: #444;
+        }
+
+        .row {
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+
+        .btns-wrap svg {
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .list-group {
+            max-height: 400px;
+            padding: 10px 20px 10px 10px;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding: 10px 15px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: all .3s;
+        }
+
+        .list-group-item:hover {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+        }
+
+        .list-group-item .url {
+            color: #444;
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .list-group-item .origin {
+            color: #C0C4CC;
+            word-break: break-all;
+        }
+
+        .list-group-item .wrap {
+            flex: 1;
+        }
+
+        .list-group-item .btns-wrap {
+            width: 70px;
+            text-align: right;
+        }
+
+        .row-title {
+            font-size: 14px;
+            padding: 0 10px;
+            color: #444;
+        }
+
+        .row-title span {
+            font-size: 14px;
+            color: #444;
+            margin-right: 5px;
+        }
+        .nodata {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #C0C4CC;
+            height: 100px;
+        }
+        .qrcode-wrap {
+            width: 128px;
+            height: 128px;
+        }
+        .el-popover {
+            min-width: 128px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>生成短链接</h1>
+        <div class="cover">
+            <div class="card">
+                <el-row class="row">
+                    <el-input placeholder="例如: https://example.com/?sign=2a7ec20f8cf8e" v-model="url">
+                        <template slot="prepend">网址</template>
+                    </el-input>
+                </el-row>
+                <el-row class="row">
+                    <el-input placeholder="自定义短网址, 如: 输入xxxx后， 将生成https://url.aiuse.xyz/xxxx" v-model="customUrl">
+                        <template slot="prepend">自定义短网址</template>
+                    </el-input>
+                </el-row>
+                <el-row class="row">
+                    <el-button type="primary" size="small" @click="generateLink" :loading="isGenerating">生成短链接</el-button>
+                    <!-- <el-button type="primary" size="small" @click="loadHistoryList">加载缓存数据</el-button> -->
+                    <el-button type="danger" size="small" @click="clearLocalStorage">清空缓存数据</el-button>
+                </el-row>
+
+                <el-row class="row" style="display: none;">
+                    <el-input placeholder="密码" v-model="password" disabled>
+                        <template slot="prepend">密码</template>
+                    </el-input>
+                </el-row>
+                <div class="card-text">
+                    <el-row class="row-title"><span class="el-icon-time"></span>历史记录</el-row>
+                    <el-scrollbar>
+                        <div class="list-group">
+                            <div class="list-group-item" v-for="(item, index) in localList" :key="index">
+                                <div class="wrap">
+                                    <div class="url">{{item.url}}</div>
+                                    <div class="origin">{{item.origin}}</div>
+                                </div>
+                                <div class="btns-wrap">
+                                    <span title="二维码" @click="qrCode">
+                                        <el-popover
+                                            placement="top"
+                                            width="100"
+                                            trigger="click"
+                                            @show="showQrcode(item, index)"
+                                        >
+                                            <div :id="'qrcode-'+ index" class="qrcode-wrap"></div>
+                                            <span slot="reference">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                                                    <path fill="currentColor" d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z" />
+                                                </svg>
+                                            </span>
+                                        </el-popover>
+                                        
+                                    </span>
+                                    <span title="复制" @click="copyUrl(item.url)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V7q0-.425.288-.713T4 6q.425 0 .713.288T5 7v13h10q.425 0 .713.288T16 21q0 .425-.288.713T15 22H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Zm0-2h9V4H9v12Zm0 0V4v12Z" />
+                                        </svg>
+                                    </span>
+                                    <span title="删除" @click="deleteUrl(item)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="color: #F56C6C;" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M7 21q-.825 0-1.413-.588T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.588 1.413T17 21H7ZM17 6H7v13h10V6ZM9 17h2V8H9v9Zm4 0h2V8h-2v9ZM7 6v13V6Z" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="nodata" v-if="localList.length == 0">没有历史记录</div>
+                        </div>
+                    </el-scrollbar>
+                </div>
+            </div>
+            <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :close-on-click-modal="false">
+                <span>{{result}}</span>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="copyUrl(result)" size="small">复制</el-button>
+                    <el-button @click="dialogVisible = false" size="small">关闭</el-button>
+                </span>
+            </el-dialog>
+        </div>
+        <a class="link-github" href="https://github.com/move132" target="_blank">
+            <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true"
+                class="octicon octicon-mark-github v-align-middle">
+                <path fill-rule="evenodd"
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                </path>
+            </svg>
+        </a>
+    </div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                isLoading: false,
+                dialogVisible: false,
+                isGenerating: false,
+                url: '',
+                customUrl: '',
+                password: '',
+                result: '',
+                localList: [{
+                    url: 'https://url.aiuse.xyz/KC6XYZ',
+                    origin: 'https://github.com/vaxilu/x-ui/blob/main/web/html/xui/setting.html'
+                }],
+                qrcode: null
+            }
+        },
+        created() {
+            this.initData()
+        },
+        methods: {
+            initData() {
+                let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
+                this.localList = history
+            },
+            generateLink() {
+                if (!denseLabs.isUrl(this.url)) {
+                    this.$message({
+                        type: 'error',
+                        message: "Invalid url"
+                    })
+                    return
+                }
+                this.isGenerating = true
+                let keyPhrase = denseLabs.generateUUID()// res.key;
+                let valueLongURL = this.url;
+                // save to localStorage
+                let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
+                const links = {key: keyPhrase, origin: valueLongURL, url: window.location.protocol + "//" + window.location.host + "/" + keyPhrase}
+                history.push(links)
+                localStorage.setItem('shorten-history', JSON.stringify(history))
+                this.isGenerating = false
+                this.initData()
+                /* fetch(window.location.pathname, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cmd: "add", url: this.url, keyPhrase: this.customUrl, password: this.password })
+                }).then((response) => {
+                    return response.json()
+                }).then((myJson) => {
+                    res = myJson;
+                    this.isGenerating = false
+                    // 成功生成短链
+                    if (res.status === 200) {
+                        let keyPhrase = res.key;
+                        let valueLongURL = this.url;
+                        // save to localStorage
+                        let history = localStorage.getItem('shorten-history') || []
+                        const links = {keyPhrase, valueLongURL}
+                        history.push(links)
+                        localStorage.setItem('shorten-history', history)
+                        // add to urlList on the page
+                        this.result = window.location.protocol + "//" + window.location.host + "/" + res.key;
+                    } else {
+                        this.result = res.error;
+                    }
+                }).catch(function (err) {
+                    console.log(err);
+                    this.dialogVisible = true
+                    this.result = "Unknow error. Please retry!"
+                    this.isGenerating = false
+                }) */
+            },
+            showQrcode(e, index) {
+                document.querySelector('#qrcode-'+ index).innerHTML = ''
+                this.qrcode = new QRCode(document.querySelector('#qrcode-'+ index), {
+                    text: e.url,
+                    width: 128,
+                    height: 128,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                })
+            },
+            loadHistoryList() {
+                this.initData()
+            },
+            clearLocalStorage() {
+                this.$confirm('此操作将清空本地缓存, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    localStorage.clear()
+                    this.$message({
+                        type: 'success',
+                        message: '清空成功'
+                    })
+                }).catch(() => {
+                    //         
+                })
+            },
+            qrCode() {
+                //
+            },
+            deleteUrl(e) {
+                this.$confirm('确定删除吗', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
+                    const index = history.findIndex(v => v.key == e.key)
+                    history.splice(index, 1)
+                    localStorage.setItem('shorten-history', JSON.stringify(history))
+                    this.initData()
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功'
+                    });
+                }).catch(() => {
+                    //         
+                })
+                
+            },
+            async copyUrl(e) {
+                const text = await denseLabs.copyToClipboard(e)
+                if (text) {
+                    this.$message({type: 'success', message: '复制成功'})
+                }
+            }
+        }
+    })
+</script>
+
+</html>
