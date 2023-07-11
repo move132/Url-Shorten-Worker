@@ -254,16 +254,7 @@
                     return
                 }
                 this.isGenerating = true
-                let keyPhrase = denseLabs.generateUUID()// res.key;
-                let valueLongURL = this.url;
-                // save to localStorage
-                let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
-                const links = {key: keyPhrase, origin: valueLongURL, url: window.location.protocol + "//" + window.location.host + "/" + keyPhrase}
-                history.push(links)
-                localStorage.setItem('shorten-history', JSON.stringify(history))
-                this.isGenerating = false
-                this.initData()
-                /* fetch(window.location.pathname, {
+                fetch(window.location.pathname, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ cmd: "add", url: this.url, keyPhrase: this.customUrl, password: this.password })
@@ -276,22 +267,28 @@
                     if (res.status === 200) {
                         let keyPhrase = res.key;
                         let valueLongURL = this.url;
+                        const url = window.location.protocol + "//" + window.location.host + "/" + keyPhrase
                         // save to localStorage
-                        let history = localStorage.getItem('shorten-history') || []
-                        const links = {keyPhrase, valueLongURL}
+                        let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
+                        const links = {key: keyPhrase, origin: valueLongURL, url}
                         history.push(links)
-                        localStorage.setItem('shorten-history', history)
+                        localStorage.setItem('shorten-history', JSON.stringify(history))
+                        this.isGenerating = false
                         // add to urlList on the page
-                        this.result = window.location.protocol + "//" + window.location.host + "/" + res.key;
+                        this.result = url
+                        this.dialogVisible = true
+                        this.initData()
                     } else {
                         this.result = res.error;
                     }
                 }).catch(function (err) {
                     console.log(err);
-                    this.dialogVisible = true
-                    this.result = "Unknow error. Please retry!"
+                    this.$message({
+                        type: 'success',
+                        message: "Unknow error. Please retry!"
+                    })
                     this.isGenerating = false
-                }) */
+                })
             },
             showQrcode(e, index) {
                 document.querySelector('#qrcode-'+ index).innerHTML = ''
