@@ -334,7 +334,11 @@
                         this.dialogVisible = true
                         this.initData()
                     } else {
-                        this.result = res.error;
+                        this.$message({
+                            type: 'error',
+                            message: res.error
+                        })
+                        this.isGenerating = false
                     }
                 }).catch((err) =>{
                     this.$message({
