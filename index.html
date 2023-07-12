@@ -29,8 +29,7 @@
             margin: 0 auto;
             box-shadow: 0 0 10px rgb(0 0 0 / 7%);
             border-radius: 10px;
-            padding: 20px;
-            margin-top: 40px;
+            padding: 10px 5px;
         }
 
 
@@ -73,7 +72,7 @@
             max-height: 400px;
             padding: 10px 10px 10px 10px;
             border: 1px solid #eee;
-            margin: 10px;
+            margin: 10px 0;
             overflow: auto;
             border-radius: 5px;
         }
@@ -125,6 +124,13 @@
         .list-group-item .origin {
             color: #C0C4CC;
             word-break: break-all;
+            max-height: 30px;
+            -webkit-line-clamp: 2;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: hidden;
         }
 
         .list-group-item .wrap {
@@ -145,7 +151,6 @@
 
         .row-title {
             font-size: 14px;
-            padding: 0 10px;
             color: #444;
         }
 
@@ -153,6 +158,9 @@
             font-size: 14px;
             color: #444;
             margin-right: 5px;
+        }
+        .card-text {
+            margin-bottom: 0;
         }
         .nodata {
             display: flex;
@@ -203,13 +211,13 @@
                         <template slot="prepend">密码</template>
                     </el-input>
                 </el-row>
-                <div class="card-text">
+                <div class="row card-text">
                     <el-row class="row-title"><span class="el-icon-time"></span>历史记录</el-row>
                     <div class="list-group">
                         <div class="list-group-item" v-for="(item, index) in localList" :key="index">
                             <div class="wrap">
                                 <div class="url">{{item.url}}</div>
-                                <div class="origin">{{item.origin}}</div>
+                                <div class="origin" :title="item.origin">{{item.origin}}</div>
                                 <div class="time">{{item.time}}</div>
                             </div>
                             <div class="btns-wrap">
@@ -243,11 +251,11 @@
                         </div>
                         <div class="nodata" v-if="localList.length == 0">没有历史记录</div>
                     </div>
+                    <el-alert style="margin-top: 20px;" :closable="false" title="😉将长的链接转换成一个短小精悍的链接，方便分享和传播。请勿用于非法用途" type="success"></el-alert>
                 </div>
-                <el-alert style="margin: 10px;" :closable="false" title="😉将长的链接转换成一个短小精悍的链接，方便分享和传播。请勿用于非法用途" type="success"></el-alert>
 
             </div>
-            <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :close-on-click-modal="false">
+            <el-dialog title="提示" :visible.sync="dialogVisible" width="85%" :close-on-click-modal="false">
                 <span>{{result}}</span>
                 <span slot="footer" class="dialog-footer">
                     <el-button type="primary" @click="copyUrl(result)" size="small">复制</el-button>
