@@ -16,10 +16,6 @@
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="https://unpkg.com/@dense-labs/utils/dist/index.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
-    <script src="https://unpkg.com/vconsole/dist/vconsole.min.js"></script>
-    <script>
-        var vConsole = new window.VConsole();
-    </script>
     <style>
         * {
             margin: 0;
@@ -350,7 +346,6 @@
             },
             showQrcode(e, index) {
                 document.querySelector('#qrcode-'+ index).innerHTML = ''
-                console.log(document.querySelector('#qrcode-'+ index))
                 this.$nextTick(() => {
                     this.qrcode = new QRCode(document.querySelector('#qrcode-'+ index), {
                         text: e.url,
