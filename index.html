@@ -351,13 +351,15 @@
             showQrcode(e, index) {
                 document.querySelector('#qrcode-'+ index).innerHTML = ''
                 console.log(document.querySelector('#qrcode-'+ index))
-                this.qrcode = new QRCode(document.querySelector('#qrcode-'+ index), {
-                    text: e.url,
-                    width: 128,
-                    height: 128,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
+                this.$nextTick(() => {
+                    this.qrcode = new QRCode(document.querySelector('#qrcode-'+ index), {
+                        text: e.url,
+                        width: 128,
+                        height: 128,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    })
                 })
             },
             loadHistoryList() {
@@ -378,9 +380,6 @@
                 }).catch(() => {
                     //         
                 })
-            },
-            qrCode() {
-                //
             },
             deleteUrl(e) {
                 this.$confirm('确定删除吗', '提示', {
