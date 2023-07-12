@@ -213,7 +213,7 @@
                                 <div class="time">{{item.time}}</div>
                             </div>
                             <div class="btns-wrap">
-                                <span title="二维码" @click="qrCode">
+                                <span title="二维码">
                                     <el-popover
                                         placement="top"
                                         width="100"
@@ -319,7 +319,7 @@
                         // save to localStorage
                         let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
                         const links = {key: keyPhrase, origin: valueLongURL, url, time: denseLabs.dateFormat(new Date(), 'yyyy-MM-dd HH:mm:ss')}
-                        history.push(links)
+                        history.unshift(links)
                         localStorage.setItem('shorten-history', JSON.stringify(history))
                         this.isGenerating = false
                         // add to urlList on the page
