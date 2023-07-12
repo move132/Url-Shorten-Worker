@@ -317,7 +317,6 @@
                     return response.json()
                 }).then((myJson) => {
                     res = myJson;
-                    this.isGenerating = false
                     // 成功生成短链
                     if (res.status === 200) {
                         let keyPhrase = res.key;
@@ -328,7 +327,6 @@
                         const links = {key: keyPhrase, origin: valueLongURL, url, time: denseLabs.dateFormat(new Date(), 'yyyy-MM-dd HH:mm:ss')}
                         history.unshift(links)
                         localStorage.setItem('shorten-history', JSON.stringify(history))
-                        this.isGenerating = false
                         // add to urlList on the page
                         this.result = url
                         this.dialogVisible = true
@@ -338,8 +336,8 @@
                             type: 'error',
                             message: res.error
                         })
-                        this.isGenerating = false
                     }
+                    this.isGenerating = false
                 }).catch((err) =>{
                     this.$message({
                         type: 'error',
