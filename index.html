@@ -66,18 +66,36 @@
         .btns-wrap svg {
             font-size: 16px;
             color: #444;
-        }
-        .btns-wrap span {
             cursor: pointer;
         }
 
         .list-group {
             max-height: 400px;
-            padding: 10px 20px 10px 10px;
+            padding: 10px 10px 10px 10px;
             border: 1px solid #eee;
             margin: 10px;
+            overflow: auto;
+            border-radius: 5px;
+        }
+        
+        .list-group::-webkit-scrollbar {
+            /*滚动条整体样式*/
+            width: 6px;
+            /*高宽分别对应横竖滚动条的尺寸*/
+            height: 1px;
         }
 
+        .list-group::-webkit-scrollbar-thumb {
+            /*滚动条里面小方块*/
+            border-radius: 4px;
+            background: rgba(144, 147, 153, .3)
+        }
+
+        .list-group::-webkit-scrollbar-track {
+            /*滚动条里面轨道*/
+            border-radius: 10px;
+            background: #fff;
+        }
         .list-group-item {
             display: flex;
             justify-content: space-between;
@@ -89,9 +107,12 @@
             border-radius: 5px;
             transition: all .3s;
         }
-
+        .list-group-item:last-child {
+            margin-bottom: 0;
+        }
         .list-group-item:hover {
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+            transform: scale(1.01);
         }
 
         .list-group-item .url {
@@ -113,6 +134,13 @@
         .list-group-item .btns-wrap {
             width: 90px;
             text-align: right;
+        }
+
+        .list-group-item .time {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #999;
+            word-break: break-all;
         }
 
         .row-title {
@@ -177,45 +205,44 @@
                 </el-row>
                 <div class="card-text">
                     <el-row class="row-title"><span class="el-icon-time"></span>历史记录</el-row>
-                    <el-scrollbar>
-                        <div class="list-group">
-                            <div class="list-group-item" v-for="(item, index) in localList" :key="index">
-                                <div class="wrap">
-                                    <div class="url">{{item.url}}</div>
-                                    <div class="origin">{{item.origin}}</div>
-                                </div>
-                                <div class="btns-wrap">
-                                    <span title="二维码" @click="qrCode">
-                                        <el-popover
-                                            placement="top"
-                                            width="100"
-                                            trigger="click"
-                                            @show="showQrcode(item, index)"
-                                        >
-                                            <div :id="'qrcode-'+ index" class="qrcode-wrap"></div>
-                                            <span slot="reference">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                                                    <path fill="currentColor" d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z" />
-                                                </svg>
-                                            </span>
-                                        </el-popover>
-                                        
-                                    </span>
-                                    <span title="复制" @click="copyUrl(item.url)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                                            <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V7q0-.425.288-.713T4 6q.425 0 .713.288T5 7v13h10q.425 0 .713.288T16 21q0 .425-.288.713T15 22H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Zm0-2h9V4H9v12Zm0 0V4v12Z" />
-                                        </svg>
-                                    </span>
-                                    <span title="删除" @click="deleteUrl(item)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="color: #F56C6C;" viewBox="0 0 24 24">
-                                            <path fill="currentColor" d="M7 21q-.825 0-1.413-.588T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.588 1.413T17 21H7ZM17 6H7v13h10V6ZM9 17h2V8H9v9Zm4 0h2V8h-2v9ZM7 6v13V6Z" />
-                                        </svg>
-                                    </span>
-                                </div>
+                    <div class="list-group">
+                        <div class="list-group-item" v-for="(item, index) in localList" :key="index">
+                            <div class="wrap">
+                                <div class="url">{{item.url}}</div>
+                                <div class="origin">{{item.origin}}</div>
+                                <div class="time">{{item.time}}</div>
                             </div>
-                            <div class="nodata" v-if="localList.length == 0">没有历史记录</div>
+                            <div class="btns-wrap">
+                                <span title="二维码" @click="qrCode">
+                                    <el-popover
+                                        placement="top"
+                                        width="100"
+                                        trigger="click"
+                                        @show="showQrcode(item, index)"
+                                    >
+                                        <div :id="'qrcode-'+ index" class="qrcode-wrap"></div>
+                                        <span slot="reference">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                                                <path fill="currentColor" d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm0 10h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm0-4h2v2h-2zm2 2h2v2h-2z" />
+                                            </svg>
+                                        </span>
+                                    </el-popover>
+                                    
+                                </span>
+                                <span title="复制" @click="copyUrl(item.url)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M5 22q-.825 0-1.413-.588T3 20V7q0-.425.288-.713T4 6q.425 0 .713.288T5 7v13h10q.425 0 .713.288T16 21q0 .425-.288.713T15 22H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Zm0-2h9V4H9v12Zm0 0V4v12Z" />
+                                    </svg>
+                                </span>
+                                <span title="删除" @click="deleteUrl(item)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="color: #F56C6C;" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M7 21q-.825 0-1.413-.588T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.588 1.413T17 21H7ZM17 6H7v13h10V6ZM9 17h2V8H9v9Zm4 0h2V8h-2v9ZM7 6v13V6Z" />
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
-                    </el-scrollbar>
+                        <div class="nodata" v-if="localList.length == 0">没有历史记录</div>
+                    </div>
                 </div>
                 <el-alert style="margin: 10px;" :closable="false" title="😉将长的链接转换成一个短小精悍的链接，方便分享和传播" type="success"></el-alert>
 
@@ -291,7 +318,7 @@
                         const url = window.location.protocol + "//" + window.location.host + "/" + keyPhrase
                         // save to localStorage
                         let history = localStorage.getItem('shorten-history') ? JSON.parse(localStorage.getItem('shorten-history')) : []
-                        const links = {key: keyPhrase, origin: valueLongURL, url}
+                        const links = {key: keyPhrase, origin: valueLongURL, url, time: denseLabs.dateFormat(new Date(), 'yyyy-MM-dd HH:mm:ss')}
                         history.push(links)
                         localStorage.setItem('shorten-history', JSON.stringify(history))
                         this.isGenerating = false
