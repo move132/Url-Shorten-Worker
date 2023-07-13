@@ -211,7 +211,7 @@
                     </el-input>
                 </el-row>
                 <div class="row card-text">
-                    <el-row class="row-title"><span class="el-icon-time"></span>历史记录</el-row>
+                    <el-row class="row-title"><span class="el-icon-time"></span>历史记录{{`(${localList.length})`}}</el-row>
                     <div class="list-group">
                         <div class="list-group-item" v-for="(item, index) in localList" :key="index">
                             <div class="wrap">
