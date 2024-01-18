@@ -10,7 +10,7 @@ const html404 = `<!DOCTYPE html>
 <body>
   <h1>404 Not Found.</h1>
   <p>The url you visit is not found.</p>
-  <p> <a href="https://github.com/move132/Url-Shorten-Worker/" target="_self">Fork me on GitHub</a> </p>
+  <p> <a href="https://github.com/igengdu/Url-Shorten-Worker/" target="_self">Fork me on GitHub</a> </p>
 </body>
 </html>`
 let response_header = {
@@ -160,7 +160,7 @@ async function handleRequest(request) {
 	const params = requestURL.search;
 	console.log(path)
 	if (!path) {
-		return Response.redirect("https://github.com/move132/Url-Shorten-Worker", 302)
+		return Response.redirect("https://github.com/igengdu/Url-Shorten-Worker", 302)
 		/* new Response(html404, {
 		  headers: {
 		    "content-type": "text/html;charset=UTF-8",
